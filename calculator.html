@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --calc-bg: #16213e;
+    --display-bg: #0f3460;
+    --btn: #1a1a3e;
+    --btn-hover: #233560;
+    --btn-active: #2a4070;
+    --operator: #e94560;
+    --operator-hover: #ff6b81;
+    --equals: #53d8a8;
+    --equals-hover: #7aecc0;
+    --text: #eaeaea;
+    --text-dim: #7a8ba6;
+    --shadow: rgba(0, 0, 0, 0.35);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(233, 69, 96, 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(83, 216, 168, 0.06) 0%, transparent 50%);
+    font-family: 'Outfit', sans-serif;
+  }
+
+  .calculator {
+    width: 340px;
+    background: var(--calc-bg);
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow:
+      0 25px 60px var(--shadow),
+      0 0 0 1px rgba(255,255,255,0.05);
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .display {
+    background: var(--display-bg);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-end;
+    overflow: hidden;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .expression {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    min-height: 20px;
+    word-break: break-all;
+  }
+
+  .result {
+    font-family: 'DM Mono', monospace;
+    font-size: 36px;
+    font-weight: 500;
+    color: var(--text);
+    transition: font-size 0.15s ease;
+    word-break: break-all;
+  }
+
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  button {
+    font-family: 'Outfit', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    border: none;
+    border-radius: 14px;
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.12s ease;
+    color: var(--text);
+    background: var(--btn);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  button:hover { background: var(--btn-hover); transform: translateY(-1px); }
+  button:active { background: var(--btn-active); transform: translateY(1px); box-shadow: none; }
+
+  button.operator {
+    background: var(--operator);
+    font-weight: 600;
+  }
+  button.operator:hover { background: var(--operator-hover); }
+
+  button.equals {
+    background: var(--equals);
+    color: #1a1a2e;
+    font-weight: 600;
+  }
+  button.equals:hover { background: var(--equals-hover); }
+
+  button.wide { grid-column: span 2; }
+
+  button.top-fn {
+    background: rgba(233, 69, 96, 0.15);
+    color: var(--operator);
+    font-size: 15px;
+  }
+  button.top-fn:hover { background: rgba(233, 69, 96, 0.25); }
+
+  /* Ripple effect */
+  button::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255,255,255,0.2) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  button:active::after { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="calculator">
+  <div class="display">
+    <div class="expression" id="expression"></div>
+    <div class="result" id="result">0</div>
+  </div>
+  <div class="buttons">
+    <button class="top-fn" onclick="clearAll()">AC</button>
+    <button class="top-fn" onclick="toggleSign()">+/−</button>
+    <button class="top-fn" onclick="percent()">%</button>
+    <button class="operator" onclick="appendOp('÷')">÷</button>
+
+    <button onclick="appendNum('7')">7</button>
+    <button onclick="appendNum('8')">8</button>
+    <button onclick="appendNum('9')">9</button>
+    <button class="operator" onclick="appendOp('×')">×</button>
+
+    <button onclick="appendNum('4')">4</button>
+    <button onclick="appendNum('5')">5</button>
+    <button onclick="appendNum('6')">6</button>
+    <button class="operator" onclick="appendOp('−')">−</button>
+
+    <button onclick="appendNum('1')">1</button>
+    <button onclick="appendNum('2')">2</button>
+    <button onclick="appendNum('3')">3</button>
+    <button class="operator" onclick="appendOp('+')">+</button>
+
+    <button class="wide" onclick="appendNum('0')">0</button>
+    <button onclick="appendNum('.')">.</button>
+    <button class="equals" onclick="calculate()">=</button>
+  </div>
+</div>
+
+<script>
+  let current = '0';
+  let expression = '';
+  let shouldReset = false;
+
+  const resultEl = document.getElementById('result');
+  const exprEl = document.getElementById('expression');
+
+  function updateDisplay() {
+    resultEl.textContent = current;
+    exprEl.textContent = expression;
+    // Shrink font for long numbers
+    resultEl.style.fontSize = current.length > 10 ? '24px' : current.length > 7 ? '30px' : '36px';
+  }
+
+  function appendNum(num) {
+    if (shouldReset) { current = '0'; shouldReset = false; }
+    if (num === '.' && current.includes('.')) return;
+    if (current === '0' && num !== '.') current = num;
+    else current += num;
+    updateDisplay();
+  }
+
+  function appendOp(op) {
+    expression = current + ' ' + op + ' ';
+    shouldReset = true;
+    updateDisplay();
+  }
+
+  function calculate() {
+    if (!expression) return;
+    const parts = expression.trim().split(' ');
+    const a = parseFloat(parts[0]);
+    const op = parts[1];
+    const b = parseFloat(current);
+    let res;
+
+    switch (op) {
+      case '+': res = a + b; break;
+      case '−': res = a - b; break;
+      case '×': res = a * b; break;
+      case '÷': res = b !== 0 ? a / b : 'Error'; break;
+      default: return;
+    }
+
+    if (typeof res === 'number') {
+      res = parseFloat(res.toPrecision(12));
+    }
+
+    expression = expression + current + ' =';
+    current = String(res);
+    shouldReset = true;
+    updateDisplay();
+  }
+
+  function clearAll() {
+    current = '0';
+    expression = '';
+    shouldReset = false;
+    updateDisplay();
+  }
+
+  function toggleSign() {
+    if (current !== '0') {
+      current = current.startsWith('-') ? current.slice(1) : '-' + current;
+      updateDisplay();
+    }
+  }
+
+  function percent() {
+    current = String(parseFloat(current) / 100);
+    updateDisplay();
+  }
+
+  // Keyboard support
+  document.addEventListener('keydown', (e) => {
+    if (e.key >= '0' && e.key <= '9') appendNum(e.key);
+    else if (e.key === '.') appendNum('.');
+    else if (e.key === '+') appendOp('+');
+    else if (e.key === '-') appendOp('−');
+    else if (e.key === '*') appendOp('×');
+    else if (e.key === '/') { e.preventDefault(); appendOp('÷'); }
+    else if (e.key === 'Enter' || e.key === '=') calculate();
+    else if (e.key === 'Escape') clearAll();
+    else if (e.key === '%') percent();
+  });
+</script>
+
+</body>
+</html>
